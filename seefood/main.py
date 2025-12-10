@@ -1,0 +1,57 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2822
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 from fastapi import FastAPI, File, UploadFile\
+from fastapi.staticfiles import StaticFiles\
+from fastapi.responses import HTMLResponse\
+import openai\
+import base64\
+import os\
+\
+app = FastAPI()\
+\
+# Mount the static folder to serve index.html\
+app.mount("/static", StaticFiles(directory="static"), name="static")\
+\
+# Initialize OpenAI (It will look for OPENAI_API_KEY in environment variables)\
+client = openai.OpenAI()\
+\
+def encode_image(image_file):\
+    return base64.b64encode(image_file).decode('utf-8')\
+\
+@app.get("/")\
+async def read_index():\
+    with open("static/index.html") as f:\
+        return HTMLResponse(content=f.read(), status_code=200)\
+\
+@app.post("/analyze")\
+async def analyze_image(file: UploadFile = File(...)):\
+    # 1. Read and encode the image\
+    contents = await file.read()\
+    base64_image = encode_image(contents)\
+\
+    # 2. Send to GPT-4o\
+    response = client.chat.completions.create(\
+        model="gpt-4o-mini", # Using mini to save costs, it has vision!\
+        messages=[\
+            \{\
+                "role": "user",\
+                "content": [\
+                    \{"type": "text", "text": "Is this a picture of a hotdog? Answer strictly with 'Hotdog' or 'Not hotdog'."\},\
+                    \{\
+                        "type": "image_url",\
+                        "image_url": \{\
+                            "url": f"data:image/jpeg;base64,\{base64_image\}"\
+                        \},\
+                    \},\
+                ],\
+            \}\
+        ],\
+    )\
+\
+    # 3. Return the answer\
+    return \{"result": response.choices[0].message.content\}}
