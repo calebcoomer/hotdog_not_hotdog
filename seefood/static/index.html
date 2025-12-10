@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SeeFood: Hotdog or Not?</title>
+    <title>SeeFood</title>
     <style>
         body { font-family: sans-serif; text-align: center; padding: 50px; background-color: #f0f0f0; }
         h1 { color: #d32f2f; }
@@ -13,8 +13,7 @@
     </style>
 </head>
 <body>
-    <h1>SeeFood</h1>
-    <p>Upload a photo to see if it is a hotdog.</p>
+    <p>Upload a photo to identify what food it is.</p>
     
     <input type="file" id="imageInput" accept="image/*">
     <button onclick="checkFood()">Check</button>
@@ -31,7 +30,6 @@
                 return;
             }
 
-            resultDiv.innerText = "Consulting Jian-Yang...";
             resultDiv.className = "";
 
             const formData = new FormData();
